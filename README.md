@@ -1,17 +1,32 @@
-# STLandVSM — ComfyUI 图像转 3D 模型节点
+# STLandVSM — 灰度图 → 精雕 VSM / STL 3D 模型
 
+> 专为**精雕软件**（Jingdiao / 北京精雕 / 文泰 / 雕刻机）设计，将 AI 生成的灰度图/深度图转换为可直接使用的 **VSM** 及 **STL** 3D 模型文件。
+>
 > 作者联系方式：**V18959848282**（微信）
 
 ---
 
-## 📦 包含两个节点
+## 🎯 核心用途
 
-本仓库包含两个 **ComfyUI 自定义节点**，需配合使用：
+**把 AI 生成的灰度图（深度图）变成精雕软件能打开的 VSM 模型。**
+
+- ✅ 主要输出 **VSM 格式**——精雕软件（北京精雕/文泰/Beihuang/Bowen）直接可用
+- ✅ 同时输出 **STL 格式**——通用 3D 打印、CNC 雕刻软件通用
+- ✅ 搭配 Comfy OIIO 节点，支持高精度 EXR 转换
+
+---
+
+## 📦 包含的节点
+
+本仓库包含以下 **ComfyUI 自定义节点**：
 
 | 节点 | 文件夹 | 功能 |
 |------|--------|------|
-| **Comfy OIIO** | `comfy_oiio` | 将生成的深位图（灰度图/深度图）转换为高清 EXR 格式 |
-| **STLandVSM** | `STLandVSM` | 接收 OIIO 转换后的 EXR 图片，生成 **STL / VSM** 3D 模型 |
+| **📂 加载图像**（新！） | `STLandVSM` | **替代系统 LoadImage**：支持 16 位灰度 PNG、EXR、TIF 等高精度格式 |
+| **Comfy OIIO** | `comfy_oiio` | 将深位图（灰度图/深度图）转换为高清 EXR 格式 |
+| **STLandVSM** | `STLandVSM` | **核心节点**：接收图像，输出 VSM（精雕）/ STL 3D 模型 |
+
+> ⚠️ **重要提示**：系统自带的 LoadImage 节点无法正确处理 16 位灰度图（会变成纯黑白），加载高位深图像时请务必使用本仓库的 **📂 加载图像** 节点。
 
 ---
 
@@ -43,32 +58,47 @@ ComfyUI/
 
 ## 🔌 节点使用说明
 
-> 🔗 **接线图示**：请参考 [节点对接说明.png](节点对接说明.png)
+> 📖 **完整使用流程**：请参考 [使用说明.png](使用说明.png)
+>
+> 🔗 **节点接线图示**：请参考 [节点对接说明.png](节点对接说明.png)
+>
+> 🎯 **节点功能说明**：请参考 [节点说明.png](节点说明.png)
+>
+> 📂 **生成目录说明**：请参考 [生成目录说明.png](生成目录说明.png)
+>
+> 🖼️ **生成效果预览**：请参考 [预览生成效果.png](预览生成效果.png)
+>
+> 🖼️ **加载图像用法**：请参考 [加载图像的使用.png](加载图像的使用.png)
 
 ### 工作流程
 
 ```
-模型生成的灰度图 → Comfy OIIO（转 EXR）→ STLandVSM（转 STL/VSM）
+16位灰度图/EXR → 📂 加载图像（高精度）→ STLandVSM（输出 VSM / STL）
+或
+AI 生成的灰度图 → Comfy OIIO（转 EXR）→ STLandVSM（输出 VSM / STL）
 ```
 
 **关键说明：**
+- **推荐**使用 **📂 加载图像** 节点代替系统 LoadImage，以获得完整精度支持
 - OIIO 接收的图像必须是 **模型生成的深位图（灰度图/深度图）**，不是普通照片
 - OIIO 将其转换为高清 EXR 格式
-- STLandVSM 接收 EXR 图片，输出 STL / VSM 3D 模型文件
+- STLandVSM 接收图像，输出 **VSM 文件**（精雕软件可用）和 **STL 文件**（通用）
 
 ### 可用节点列表
 
 启动 ComfyUI 后，您可以在节点列表中找到：
 
-| 节点名称 | 所属 |
-|----------|------|
-| STL & VSM Converter | STLandVSM |
-| 安全3D预览桥接 | STLandVSM |
-| GLB 预览 | STLandVSM |
-| 文件夹选择器 | STLandVSM |
-| 布尔开关 | STLandVSM |
-| 格式选择器 | STLandVSM |
-| OIIO SaveImage / OIIO LoadImage | comfy_oiio |
+| 节点名称 | 所属 | 用途 |
+|----------|------|------|
+| 加载图像 (高精度) | image | 📂 替代 LoadImage，支持高位深 |
+| STL & VSM Converter | STLandVSM | 🔥 核心节点：生成 VSM / STL 模型 |
+| 安全 3D 预览桥接 | STLandVSM | 安全预览 3D 模型 |
+| GLB 预览 | STLandVSM | GLB 格式 3D 预览 |
+| 文件夹选择器 | STLandVSM | 选择输出文件夹 |
+| 布尔开关 | STLandVSM | 开关控制 |
+| 格式选择器 | STLandVSM | 输出格式选择 |
+| OIIO SaveImage | comfy_oiio | 保存 EXR 格式图片 |
+| OIIO LoadImage | comfy_oiio | 加载 EXR 格式图片 |
 
 ---
 
