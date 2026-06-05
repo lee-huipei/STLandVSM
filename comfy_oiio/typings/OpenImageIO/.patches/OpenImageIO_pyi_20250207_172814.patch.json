@@ -1,0 +1,7 @@
+{
+  "target": "C:\\Users\\User\\dev\\melMass\\stable-diffusion\\ComfyUI.git\\custom_nodes\\comfy_oiio\\typings\\OpenImageIO\\OpenImageIO.pyi",
+  "created": "2025-02-07 17:28:14.084166500 +01:00",
+  "min_version": null,
+  "max_version": null,
+  "description": "ndarray for read_image"
+}

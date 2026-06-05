@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfy-oiio"
+version = "0.1.0"
+# dynamic = ["version"]
+description = "OpenImageIO plugin for ComfyUI"
+requires-python = ">=3.10"
+license = "MIT"
+readme = "README.md"
+# repository = "https://github.com/melMass/Comfy-OIIO"
+dependencies = ["opencolorio>=3.0.3.1"]
+authors = [{ name = "Mel Massadian", email = "mel@melmassadian.com" }]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Intended Audience :: Developers",
+]
+
+[tool.comfy]
+PublisherId = "mel"
+DisplayName = "OpenImageIO for Comfy"
+Icon = "https://avatars.githubusercontent.com/u/7041726?v=4"
+
+[dependency-groups]
+dev = ["marimo"]
+test = ["pytest", "pytest-cov", "nox"]
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+# include = ["comfy_oiio.*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "comfy_oiio.__version__" }
+
+[tool.pyright]
+stubPath = "typings"
+reportMissingTypeArgument = true # Report generic classes used without type arguments
+strictListInference = true       # Use union types when inferring types of lists elements, instead of Any
+reportMissingTypeStubs = false
+typeCheckingMode = "basic"
+pythonVersion = "3.10"
+
+[tool.ruff]
+line-length = 100
+lint.select = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "FBT",
+  "I",
+  "N",
+  "S",
+  "SIM",
+  "UP",
+  "W",
+]
+extend-exclude = ["./docs/conf.py"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"] # imported but unused
+"tests/*" = ["S101"] # use of assert detected
+"scripts/*" = [
+  "D103", # missing docstring in public function
+  "S603", # check for execution of untrusted input
+  "S607", # starting a process with a partial executable path
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

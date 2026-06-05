@@ -1,0 +1,40 @@
+diff --git a/typings/OpenImageIO/OpenImageIO.pyi b/typings/OpenImageIO/OpenImageIO.pyi
+index 32639f3..e0c5a28 100644
+--- a/typings/OpenImageIO/OpenImageIO.pyi
++++ b/typings/OpenImageIO/OpenImageIO.pyi
+@@ -3410,7 +3410,7 @@ class ImageInput:
+         """geterror(self: OpenImageIO.OpenImageIO.ImageInput, clear: bool = True) -> str"""
+     @overload
+     @staticmethod
+-    def open(filename: str) -> object:
++    def open(filename: str) -> ImageInput:
+         """open(*args, **kwargs)
+         Overloaded function.
+ 
+@@ -3420,7 +3420,7 @@ class ImageInput:
+         """
+     @overload
+     @staticmethod
+-    def open(filename: str, config: ImageSpec) -> object:
++    def open(filename: str, config: ImageSpec) -> ImageInput:
+         """open(*args, **kwargs)
+         Overloaded function.
+ 
+@@ -3545,7 +3545,7 @@ class ImageOutput:
+     def copy_image(self, arg0: ImageInput) -> bool:
+         """copy_image(self: OpenImageIO.OpenImageIO.ImageOutput, arg0: OpenImageIO.OpenImageIO.ImageInput) -> bool"""
+     @staticmethod
+-    def create(filename: str, plugin_searchpath: str = ...) -> object:
++    def create(filename: str, plugin_searchpath: str = ...) -> ImageOutput:
+         """create(filename: str, plugin_searchpath: str = '') -> object"""
+     def format_name(self) -> str:
+         """format_name(self: OpenImageIO.OpenImageIO.ImageOutput) -> str"""
+@@ -3651,7 +3651,7 @@ class ImageSpec:
+         5. __init__(self: OpenImageIO.OpenImageIO.ImageSpec, arg0: OpenImageIO.OpenImageIO.ImageSpec) -> None
+         """
+     @overload
+-    def __init__(self, arg0: int, arg1: int, arg2: int, arg3: TypeDesc) -> None:
++    def __init__(self, arg0: int, arg1: int, arg2: int, arg3: BASETYPE) -> None:
+         """__init__(*args, **kwargs)
+         Overloaded function.
+ 

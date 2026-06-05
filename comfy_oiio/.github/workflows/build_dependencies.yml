@@ -1,0 +1,33 @@
+name: "Build dependencies"
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win32
+            arch: x64
+          # - os: macos-latest
+          #   platform: darwin
+          #   arch: arm64
+          # - os: ubuntu-latest
+          #   platform: linux
+          #   arch: x64
+
+    name: build native depenecies for ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build OpenImageIO from source
+        id: build_oiio
+        uses: melMass/actions@nukit
+        with:
+          script: |
+            source scripts/build_oiio.nu

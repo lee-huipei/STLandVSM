@@ -1,0 +1,21 @@
+diff --git a/typings/OpenImageIO/OpenImageIO.pyi b/typings/OpenImageIO/OpenImageIO.pyi
+index e0c5a28..ec2c5bf 100644
+--- a/typings/OpenImageIO/OpenImageIO.pyi
++++ b/typings/OpenImageIO/OpenImageIO.pyi
+@@ -1,5 +1,6 @@
+ from _typeshed import Incomplete
+-from typing import ClassVar, Iterator, overload
++from typing import ClassVar, Iterator, overload, Any
++from numpy import typing as npt
+ 
+ AutoStride: int
+ BOX: VECSEMANTICS
+@@ -3429,7 +3430,7 @@ class ImageInput:
+         2. open(filename: str, config: OpenImageIO.OpenImageIO.ImageSpec) -> object
+         """
+     @overload
+-    def read_image(self, subimage: int, miplevel: int, chbegin: int, chend: int, format: TypeDesc = ...) -> object:
++    def read_image(self, subimage: int, miplevel: int, chbegin: int, chend: int, format: TypeDesc = ...) -> npt.NDArray[Any]:
+         """read_image(*args, **kwargs)
+         Overloaded function.
+ 

@@ -1,0 +1,16 @@
+# ===== 核心依赖（必需） =====
+numpy>=1.21.0
+Pillow>=9.0.0
+
+# ===== 高清图像格式支持 =====
+pypng>=0.20220715.0             # PNG 16位支持
+tifffile>=2023.0.0              # TIF 8位/16位/32位浮点支持
+
+# ===== EXR格式支持 =====
+# OpenImageIO - 工业级EXR支持，带色彩管理和压缩
+# 安装方法: pip install openimageio
+openimageio>=3.0.3.1
+
+# OpenEXR - 基本EXR支持（OpenImageIO不可用时的降级方案）
+# 注意：OpenEXR会自动安装Imath，无需手动指定
+OpenEXR>=3.2.0
