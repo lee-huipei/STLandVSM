@@ -1,118 +1,71 @@
-import os, sys, shutil, folder_paths
+# coding: utf-8
+import os, sys, hashlib, base64, shutil, folder_paths
+_j=os.path.dirname(os.path.abspath(__file__));_l=__name__
+_k=hashlib.sha256(b"GMHD_STLandVSM_2026_SIGN").digest()
 
-_my_dir = os.path.dirname(os.path.abspath(__file__))
-
-_PKG = __name__  # ComfyUI may register module under different name
-
-def _load_core(name):
-    import importlib.machinery, importlib.util
-    # Try .pyc first (encrypted mode)
-    pyc_path = os.path.join(_my_dir, name + ".cpython-313.pyc")
-    if not os.path.exists(pyc_path):
-        pyc_path = os.path.join(_my_dir, name + ".pyc")
-    if os.path.exists(pyc_path):
-        module_name = _PKG + "." + name
-        loader = importlib.machinery.SourcelessFileLoader(module_name, pyc_path)
-        spec = importlib.util.spec_from_loader(module_name, loader, origin=pyc_path)
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = mod
-        loader.exec_module(mod)
-        return mod
-    # Fallback: try standard import (for .py source)
-    try:
-        import importlib as _il
-        mod = _il.import_module("." + name, package=_PKG)
-        sys.modules[_PKG + "." + name] = mod
-        return mod
-    except:
-        return None
-
-_license_mod = _load_core("_license")
-_exr_mod = _load_core("exr_handler")
-_stl_mod = _load_core("img_to_stl")
-_vsm_mod = _load_core("img_to_vsm")
-_main_mod = _load_core("stl_vsm_converter")
-
-if _license_mod:
-    _valid, _msg = _license_mod.verify_license()
-    if _valid:
-        print("[STLandVSM] License OK: " + str(_msg))
-    else:
-        print("[STLandVSM] WARNING: " + str(_msg))
-        print("[STLandVSM] Contact for license")
-
+def _f(n):
+ try:
+  p=os.path.join(_j,n+".enc")
+  with open(p,"r",encoding="ascii") as h:c=h.read()
+  d=base64.b64decode(c);r=bytearray()
+  for i,b in enumerate(d):r.append(b^_k[i%len(_k)])
+  mn=_l+"."+n;m=type(n,(),{})()
+  m.__dict__["__name__"]=mn;m.__dict__["__file__"]=p
+  m.__dict__["__spec__"]=None;m.__dict__["__builtins__"]=__builtins__
+  sys.modules[mn]=m;exec(compile(bytes(r),p,"exec"),m.__dict__);return m
+ except Exception as e:print("[STLandVSM] load "+n+".enc failed: "+str(e)[:80]);return None
+_m__license=_f("_license")
+_m_exr_handler=_f("exr_handler")
+_m_format_selector=_f("format_selector")
+_m_glb_preview=_f("glb_preview")
+_m_img_to_stl=_f("img_to_stl")
+_m_img_to_vsm=_f("img_to_vsm")
+_m_safe_preview_bridge=_f("safe_preview_bridge")
+_m_stl_vsm_converter=_f("stl_vsm_converter")
+_m_universal_image_loader=_f("universal_image_loader")
+from .bool_switch import *;from .folder_picker import *
+_lic_mod=_m__license
+if _lic_mod:
+ try:_lic_valid,_lic_msg=_lic_mod.verify_license()
+ except Exception as _le:_lic_valid=False;_lic_msg="verify error: "+str(_le)[:60]
+ if _lic_valid:print("[STLandVSM] License OK: "+str(_lic_msg))
+ else:print("[STLandVSM] WARNING: "+str(_lic_msg))
+else:_lic_valid=False;_lic_msg=""
 import re as _re
-def _get_status_suffix():
-    global _valid, _msg
-    if not _valid:
-        m = str(_msg).lower() if _msg else ""
-        if "trial expired" in m or "expired" in m:
-            return " ✗过期"
-        if "trial record" in m or "abnormal" in m:
-            return " ✗异常"
-        return " ✗未激活"
-    m = str(_msg).lower()
-    if "permanent" in m:
-        return " ★永久"
-    if "trial" in m:
-        if "started" in m:
-            return " ⏳试用7天"
-        mt = _re.search(r"remaining\s+(\d+)", m)
-        if mt:
-            return " ⏳试用" + mt.group(1) + "天"
-        return " ⏳试用"
-    if "remaining" in m:
-        mt = _re.search(r"remaining\s+(\d+)", m)
-        if mt:
-            return " ⏳" + mt.group(1) + "天"
-        return " ⏳限时"
-    return ""
-
-if _license_mod:
-    _status_suffix = _get_status_suffix()
-    if _status_suffix:
-        print("[STLandVSM] Status: [" + _status_suffix + "]")
-else:
-    _status_suffix = ""
-
-os.makedirs(os.path.join(folder_paths.get_output_directory(), "STL"), exist_ok=True)
-os.makedirs(os.path.join(folder_paths.get_output_directory(), "VSM"), exist_ok=True)
-
-_preview_dir = os.path.join(folder_paths.get_output_directory(), "glb_preview")
-os.makedirs(_preview_dir, exist_ok=True)
-_brand_path = os.path.join(_my_dir, "assets", "branding.glb")
-if os.path.exists(_brand_path):
-    _dest = os.path.join(_preview_dir, "branding.glb")
-    if not os.path.exists(_dest) or os.path.getsize(_dest) != os.path.getsize(_brand_path):
-        shutil.copy2(_brand_path, _dest)
-        print("[STLandVSM] Branding model copied: " + str(_dest))
-
-from .safe_preview_bridge import Safe3DPreviewBridge
-from .folder_picker import FolderPicker
-from .bool_switch import BoolSwitch
-from .format_selector import FormatSelector
-from .glb_preview import NODE_CLASS_MAPPINGS as GLB_MAPPINGS
-from .glb_preview import NODE_DISPLAY_NAME_MAPPINGS as GLB_DISPLAY
-
-_base_name = "STL & VSM Conv" + _status_suffix
-
-NODE_CLASS_MAPPINGS = {
-    "STLVSMConverter": _main_mod.STLVSMConverter if _main_mod else None,
-    "Safe3DPreviewBridge": Safe3DPreviewBridge,
-    "FolderPicker": FolderPicker,
-    "BoolSwitch": BoolSwitch,
-    "FormatSelector": FormatSelector,
-    **GLB_MAPPINGS,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "STLVSMConverter": _base_name,
-    "Safe3DPreviewBridge": "安全3D预览桥接",
-    "FolderPicker": "📁 文件夹选择器",
-    "BoolSwitch": "🔘 布尔开关",
-    "FormatSelector": "📋 格式选择器",
-    **GLB_DISPLAY,
-}
-
-__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-WEB_DIRECTORY = "./web"
+def _s():
+ global _lic_valid,_lic_msg
+ if not _lic_valid:m=str(_lic_msg).lower()if _lic_msg else"";return" X"
+ m=str(_lic_msg).lower()
+ if"permanent"in m:return" P"
+ if"trial"in m:
+  if"started"in m:return" T7d"
+  mt=_re.search(r"remaining\s+(\d+)",m)
+  if mt:return" T"+mt.group(1)+"d"
+  return" T"
+ if"remaining"in m:
+  mt=_re.search(r"remaining\s+(\d+)",m)
+  if mt:return" "+mt.group(1)+"d"
+  return" L"
+ return""
+_ss=_s()if _lic_mod else""
+if _ss:print("[STLandVSM] Status: ["+_ss+"]")
+_=os
+_.makedirs(_.path.join(folder_paths.get_output_directory(),"STL"),exist_ok=True)
+_.makedirs(_.path.join(folder_paths.get_output_directory(),"VSM"),exist_ok=True)
+_pd=_.path.join(folder_paths.get_output_directory(),"glb_preview")
+_.makedirs(_pd,exist_ok=True)
+_bp=_.path.join(_.path.dirname(_.path.abspath(__file__)),"assets","branding.glb")
+if _.path.exists(_bp):
+ _bd=_.path.join(_pd,"branding.glb")
+ if not _.path.exists(_bd)or _.path.getsize(_bd)!=_.path.getsize(_bp):shutil.copy2(_bp,_bd)
+_SB=getattr(_m_safe_preview_bridge,"Safe3DPreviewBridge",None)if _m_safe_preview_bridge else None
+_FS=getattr(_m_format_selector,"FormatSelector",None)if _m_format_selector else None
+_UL=getattr(_m_universal_image_loader,"UniversalImageLoader",None)if _m_universal_image_loader else None
+_GM=getattr(_m_glb_preview,"NODE_CLASS_MAPPINGS",{})if _m_glb_preview else {}
+_GD=getattr(_m_glb_preview,"NODE_DISPLAY_NAME_MAPPINGS",{})if _m_glb_preview else {}
+_conv=getattr(_m_stl_vsm_converter,"STLVSMConverter",None)if _m_stl_vsm_converter else None
+_BS,_FP=BoolSwitch,FolderPicker
+_base="STL & VSM Conv"+_ss
+NODE_CLASS_MAPPINGS={"STLVSMConverter":_conv,"Safe3DPreviewBridge":_SB,"FolderPicker":_FP,"BoolSwitch":_BS,"FormatSelector":_FS,"UniversalImageLoader":_UL,**_GM}
+NODE_DISPLAY_NAME_MAPPINGS={"STLVSMConverter":_base,"Safe3DPreviewBridge":"安全3D预览桥接","FolderPicker":"📁 文件夹选择器","BoolSwitch":"🔘 布尔开关","FormatSelector":"📋 图像格式选择器","UniversalImageLoader":"加载图像 (高精度)",**_GD}
+__all__=["NODE_CLASS_MAPPINGS","NODE_DISPLAY_NAME_MAPPINGS"];WEB_DIRECTORY="./web"
