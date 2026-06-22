@@ -370,7 +370,7 @@ class OIIO_SaveImage:
                 "frame_pad": ("INT", {"default": 4, "min": 1, "max": 8}),
                 "dwa_compression_level": ("FLOAT", {"default": 45.0, "min": 10.0, "max": 250.0}),
                 "save_preview": ("BOOLEAN", {"default": False}),
-                "save_file": ("BOOLEAN", {"default": True}),  # 新增：控制是否保存文件
+                "save_file": ("BOOLEAN", {"default": False}),  # 新增：控制是否保存文件
             },
             "hidden": {
                 "prompt": "PROMPT",
