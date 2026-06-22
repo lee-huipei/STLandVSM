@@ -231,11 +231,20 @@ app.registerExtension({
                 }
             }
 
+            let _dirty = true;
+            function renderScene() {
+                _dirty = true;
+            }
             function animate() {
                 checkSize();
-                if (controls) controls.update();
-                if (renderer && scene && camera) renderer.render(scene, camera);
+                if (_dirty) {
+                    if (controls) controls.update();
+                    if (renderer && scene && camera) renderer.render(scene, camera);
+                    _dirty = false;
+                }
                 requestAnimationFrame(animate);
+                if (controls) controls.addEventListener("change", renderScene);
+                window.addEventListener("resize", renderScene);
             }
 
             function loadGLB(url) {
@@ -263,6 +272,7 @@ app.registerExtension({
                         camera.position.set(distance * 0.7, distance * 0.55, distance * 0.85);
                         camera.lookAt(0, newSize.y * 0.35, 0);
                         if (controls) { controls.target.set(0, newSize.y * 0.35, 0); controls.update(); }
+                    _dirty = true;
                     }
                 }, undefined, (err) => {
                     console.error("[GLB预览] 加载失败:", err);
