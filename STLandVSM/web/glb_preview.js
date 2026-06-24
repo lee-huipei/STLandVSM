@@ -65,6 +65,7 @@ app.registerExtension({
                 modeWidget.callback = (v) => {
                     currentMode = v;
                     if (currentModel) applyMaterial(currentModel, currentMode);
+                    _dirty = true;
                 };
             }
 
