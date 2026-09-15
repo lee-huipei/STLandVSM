@@ -83,6 +83,7 @@ app.registerExtension({
             node.addDOMWidget("viewer", "canvas", container, { serialize: false, hideOnZoom: false });
 
             let scene, camera, renderer, controls, currentModel;
+            let grid = null, floor = null;
             let width = 400, height = 300;
 
             function applyMaterial(model, mode) {
@@ -196,11 +197,11 @@ app.registerExtension({
                     scene.add(light);
                 }
 
-                const grid = new GridHelper(20, 20, 0x555577, 0x333355);
+                grid = new GridHelper(20, 20, 0x555577, 0x333355);
                 grid.position.y = 0;
                 scene.add(grid);
 
-                const floor = new Mesh(
+                floor = new Mesh(
                     new PlaneGeometry(24, 24),
                     new MeshStandardMaterial({
                         color: 0x12121e, transparent: true, opacity: 0.5,
@@ -215,8 +216,8 @@ app.registerExtension({
                 if (OrbitControls) {
                     controls = new OrbitControls(camera, renderer.domElement);
                     controls.enableDamping = true;
-                    controls.minDistance = 1;
-                    controls.maxDistance = 50;
+                    controls.minDistance = 0.5;
+                    controls.maxDistance = 2000;
                 }
                 animate();
             }
@@ -272,8 +273,33 @@ app.registerExtension({
                         const distance = maxDim * 2.2;
                         camera.position.set(distance * 0.7, distance * 0.55, distance * 0.85);
                         camera.lookAt(0, newSize.y * 0.35, 0);
-                        if (controls) { controls.target.set(0, newSize.y * 0.35, 0); controls.update(); }
-                    _dirty = true;
+                        if (controls) {
+                            controls.target.set(0, newSize.y * 0.35, 0);
+                            // 允许拉远到能完整看到模型(模型物理尺寸随精度变化,最大可达~70)
+                            controls.maxDistance = Math.max(controls.maxDistance, distance * 1.6);
+                            controls.update();
+                        }
+                        // 相机远裁剪面跟随模型大小
+                        camera.far = Math.max(camera.far, distance * 6);
+                        camera.updateProjectionMatrix();
+                        // 网格/地面跟随模型尺寸
+                        const gs = Math.max(1, maxDim / 10);
+                        if (grid) grid.scale.set(gs, gs, gs);
+                        if (floor) floor.scale.set(gs, gs, gs);
+                        // 阴影范围跟随模型尺寸
+                        scene.traverse((o) => {
+                            if (o.isDirectionalLight && o.castShadow) {
+                                const half = maxDim * 0.8;
+                                o.shadow.camera.left = -half;
+                                o.shadow.camera.right = half;
+                                o.shadow.camera.top = half;
+                                o.shadow.camera.bottom = -half;
+                                o.shadow.camera.near = 0.5;
+                                o.shadow.camera.far = Math.max(50, maxDim * 4);
+                                o.shadow.camera.updateProjectionMatrix();
+                            }
+                        });
+                        _dirty = true;
                     }
                 }, undefined, (err) => {
                     console.error("[GLB预览] 加载失败:", err);

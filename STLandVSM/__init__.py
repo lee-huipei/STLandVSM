@@ -1,4 +1,4 @@
-# coding: utf-8
+﻿# coding: utf-8
 
 
 
@@ -16,23 +16,41 @@ def _f(n):
 
  try:
 
+  mn=_l+"."+n
+
   p=os.path.join(_j,n+".enc")
 
-  with open(p,"r",encoding="ascii")as h:c=h.read()
+  if os.path.exists(p):          # 加密版(D盘发布用)
 
-  d=base64.b64decode(c);r=bytearray()
+   with open(p,"r",encoding="ascii")as h:c=h.read()
 
-  for i,b in enumerate(d):r.append(b^_k[i%len(_k)])
+   d=base64.b64decode(c);r=bytearray()
 
-  mn=_l+"."+n;m=type(n,(),{})()
+   for i,b in enumerate(d):r.append(b^_k[i%len(_k)])
 
-  m.__dict__["__name__"]=mn;m.__dict__["__file__"]=p
+   m=type(n,(),{})()
 
-  m.__dict__["__spec__"]=None;m.__dict__["__builtins__"]=__builtins__
+   m.__dict__["__name__"]=mn;m.__dict__["__file__"]=p
 
-  sys.modules[mn]=m;exec(compile(bytes(r),p,"exec"),m.__dict__);return m
+   m.__dict__["__spec__"]=None;m.__dict__["__builtins__"]=__builtins__
 
- except Exception as e:print("[STLandVSM]load "+n+".enc failed:"+str(e)[:80]);return None
+   sys.modules[mn]=m;exec(compile(bytes(r),p,"exec"),m.__dict__);return m
+
+  py=os.path.join(_j,n+".py")    # 未加密版(E盘开发/自用)
+
+  if os.path.exists(py):
+
+   import importlib.util as _iu
+
+   sp=_iu.spec_from_file_location(mn,py);m=_iu.module_from_spec(sp)
+
+   m.__dict__["__builtins__"]=__builtins__
+
+   sys.modules[mn]=m;sp.loader.exec_module(m);return m
+
+  return None
+
+ except Exception as e:print("[STLandVSM]load "+n+" failed:"+str(e)[:80]);return None
 
 
 
@@ -131,7 +149,7 @@ if _.path.exists(_bp):
 _SB=getattr(_m_safe_preview_bridge,"Safe3DPreviewBridge",None)if _m_safe_preview_bridge else None
 
 _FS=getattr(_m_format_selector,"FormatSelector",None)if _m_format_selector else None
-_VPS=getattr(_m_format_selector,"VSM精度选择器",None)if _m_format_selector else None
+_VPS=getattr(_m_format_selector,"模型精度选择器",None)if _m_format_selector else None
 
 _UL=getattr(_m_universal_image_loader,"UniversalImageLoader",None)if _m_universal_image_loader else None
 
@@ -145,8 +163,8 @@ _BS,_FP=BoolSwitch,FolderPicker
 
 _base="STL & VSM Conv"+_ss
 
-NODE_CLASS_MAPPINGS={"STLVSMConverter":_conv,"Safe3DPreviewBridge":_SB,"FolderPicker":_FP,"BoolSwitch":_BS,"FormatSelector":_FS,"VSM精度选择器":_VPS,"UniversalImageLoader":_UL,**_GM}
+NODE_CLASS_MAPPINGS={"STLVSMConverter":_conv,"Safe3DPreviewBridge":_SB,"FolderPicker":_FP,"BoolSwitch":_BS,"FormatSelector":_FS,"模型精度选择器":_VPS,"UniversalImageLoader":_UL,**_GM}
 
-NODE_DISPLAY_NAME_MAPPINGS={"STLVSMConverter":_base,"Safe3DPreviewBridge":"安全3D预览桥接","FolderPicker":"📁 文件夹选择器","BoolSwitch":"🔘 布尔开关","FormatSelector":"📋 图像格式选择器","VSM精度选择器":"📐 VSM精度选择器","UniversalImageLoader":"加载图像 (高精度)",**_GD}
+NODE_DISPLAY_NAME_MAPPINGS={"STLVSMConverter":_base,"Safe3DPreviewBridge":"安全3D预览桥接","FolderPicker":"📁 文件夹选择器","BoolSwitch":"🔘 布尔开关","FormatSelector":"📋 图像格式选择器","模型精度选择器":"📐 模型精度选择器","UniversalImageLoader":"加载图像 (高精度)",**_GD}
 
 __all__=["NODE_CLASS_MAPPINGS","NODE_DISPLAY_NAME_MAPPINGS"];WEB_DIRECTORY="./web"
